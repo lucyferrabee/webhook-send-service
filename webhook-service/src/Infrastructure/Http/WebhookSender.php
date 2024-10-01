@@ -17,7 +17,7 @@ class WebhookSender
 
     public function send(Webhook $webhook): bool
     {
-        var_dump('trying to send for webhook id: ' . $webhook->getId());
+        var_dump('trying to send for webhook id: ' . $webhook->getId(), 'endpoint: ' . $webhook->getUrl());
 
         try {
             $response = $this->httpClient->request('GET', $webhook->getUrl(), [
