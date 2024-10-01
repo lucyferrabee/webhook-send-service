@@ -25,51 +25,54 @@ To set up the project, ensure you have PHP (version 7.4 or later) and Composer i
 
 ## Design Choices
 
-The DDD principles focus on:
+I focused on the following DDD principles:
 
-Separation of Concerns: The application is divided into distinct layers, ensuring that business logic is separate
-from infrastructure concerns. This improves maintainability and allows for clearer understanding and management of the codebase.
+Separation of Concerns: The app is structured into distinct layers, so business logic is kept separate from infrastructure concerns. 
+This separation makes the code easier to maintain and understand.
 
-Ubiquitous Language: The code is designed around the business domain, using a Webhook in this instance as an entity. 
+Ubiquitous Language: The design revolves around the business domain. In this case, a Webhook is treated as an entity.
 
-Encapsulation: Business logic is encapsulated within domain entities, reducing the risk of unexpected side effects when changes are made.
+Encapsulation: Business logic is encapsulated within domain entities, which helps prevent unexpected side effects when making changes.
 
-While DDD introduces some complexity in terms of architecture, it pays off in maintainability and scalability for larger applications.
-For smaller projects, a simpler architecture might have been sufficient, but DDD prepares the application for future growth.
-Initial implementations might have been faster if a simpler approach was taken, but adhering to DDD principles ensures that
-future modifications are easier to manage and understand.
+While DDD does add some complexity to the architecture, it really pays off in terms of maintainability and scalability for 
+larger applications. For smaller projects, a simpler architecture might have sufficed, but DDD allows for future growth. 
+I recognize that the initial implementation could have been quicker with a simpler approach, but sticking to DDD principles means 
+that future modifications will be easier to manage and understand.
 
 ## Project Structure
 
-Application: Contains use cases and application logic, including the WebhookProcessor.
+Application: Contains the use cases and application logic, including the WebhookProcessor.
 
-Domain: Holds the core business logic and entities, such as Webhook.
+Domain: Houses the core business logic and entities, like Webhook.
 
-Infrastructure: Manages external interactions like sending webhooks.
+Infrastructure: Manages external interactions, such as sending webhooks.
 
-Tests: Contains unit and integration tests to validate the functionality.
+Tests: Contains unit and integration tests to ensure everything works as expected.
 
-Command: Contains the logic for running the command on the command line.
+Command: Includes the logic for running commands in the command line.
 
 ## Security Considerations
 
+In a commercial setting I would need to consider the following:
+
 Input Validation: Ensure that all inputs (e.g., webhook URLs) are validated to prevent malicious payloads from being processed.
 
-Error Handling: Proper error handling is implemented to avoid leaking sensitive information in case of failures. Logs should be monitored for unusual activity.
+Error Handling: Proper error handling is implemented to avoid leaking sensitive information in case of failures. 
+Logs should be monitored for unusual activity.
 
 Rate Limiting: Implementing rate limiting for webhook endpoints to mitigate potential abuse.
 
 ## Thoughts For Future Improvements
 
-- Implementing AWS Simple Queue Service (SQS) for handling webhook requests could enhance reliability and allow for
-asynchronous processing, improving performance and scalability.
+- Implementing AWS Simple Queue Service (SQS) for handling webhook requests.
 
-- Integrating logging and monitoring solutions (e.g., ELK stack or Prometheus) would provide better insights into webhook 
-processing, allowing for proactive issue resolution.
+- Integrating logging and monitoring solutions for better observability.
 
 - Enhance retry policies with configurable options to adjust parameters (e.g., max attempts, delays) based on endpoint
 characteristics or user preferences.
 
-- A user interface to monitor webhook statuses, including successes and failures, could provide valuable insights for end-users.
+- A user interface to monitor webhook statuses, including successes and failures.
 
-- Adding support for different protocols (e.g., WebSocket) could extend the application’s functionality to cater to various use cases.
+- Using a database for logging successes/failures, as well as the webhooks/endpoints for scalability.
+
+- Could add more test fixtures for various combinations of success/failures to ensure robustness.
