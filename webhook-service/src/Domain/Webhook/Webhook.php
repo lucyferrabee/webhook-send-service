@@ -9,7 +9,6 @@ class Webhook
     private string $name;
     private string $event;
     private int $retryCount = 0;
-    private int $maxRetries = 5;
 
     public function __construct(string $id, string $url, string $name, $event)
     {
@@ -17,16 +16,6 @@ class Webhook
         $this->url = $url;
         $this->name = $name;
         $this->event = $event;
-    }
-
-    public function incrementRetryCount(): void
-    {
-        $this->retryCount++;
-    }
-
-    public function hasExceededMaxRetries(): bool
-    {
-        return $this->retryCount >= $this->maxRetries;
     }
 
     public function getUrl(): string
