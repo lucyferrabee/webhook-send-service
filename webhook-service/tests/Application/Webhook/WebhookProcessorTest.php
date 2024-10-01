@@ -6,37 +6,19 @@ use PHPUnit\Framework\TestCase;
 use App\Application\Webhook\WebhookProcessor;
 use App\Domain\Webhook\Webhook;
 use App\Infrastructure\Http\WebhookSender;
-use App\Application\Webhook\WebhookLoader;
 
 class WebhookProcessorTest extends TestCase
 {
-    /**
-     * @var mixed|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $webhookSender;
-    /**
-     * @var WebhookProcessor
-     */
-    private $processor;
-    /**
-     * @var WebhookLoader
-     */
-    private $loader;
+    private WebhookSender $webhookSender;
+    private WebhookProcessor $processor;
 
     protected function setUp(): void
     {
         $this->webhookSender = $this->createMock(WebhookSender::class);
-        $this->processor = new WebhookProcessor($this->webhookSender);
-    }
-
-    public function testLoadWebhooksFromFile()
-    {
-        $webhooks = $this->loader->loadWebhooksFromFile(__DIR__ . '/../../Fixtures/webhooks.txt');
-
-        $this->assertCount(15, $webhooks);
-
-        $this->assertEquals('https://webhook-test.info1100.workers.dev/success1', $webhooks[0]->getUrl());
-        $this->assertEquals(1, $webhooks[0]->getPayload()['order_id']);
+        $this->processor = $this->getMockBuilder(WebhookProcessor::class)
+            ->setConstructorArgs([$this->webhookSender])
+            ->onlyMethods(['sleep'])
+            ->getMock();
     }
 
     public function testSuccessfulWebhookSend()
@@ -57,32 +39,28 @@ class WebhookProcessorTest extends TestCase
 
         $webhook = new Webhook("https://webhook-test.info1100.workers.dev/retry1", 6, "Neha Lebeau", "Fall Foliage Farm");
 
-        $this->mockSleep();
+        $this->processor->expects($this->exactly(3))
+        ->method('sleep')
+            ->withConsecutive([1], [2], [4]);
+
         $this->processor->process($webhook);
 
         $this->assertEquals(3, $webhook->getRetryCount());
     }
 
-    public function testMaxRetryCountHandling()
-    {
-        $this->webhookSender->method('send')->willReturn(false);  // Simulate failure
-
-        $webhook = new Webhook("https://webhook-test.info1100.workers.dev/fail1", 2, "Kumaran Powell", "Serene Sands");
-        $this->processor->process($webhook);
-
-        $this->assertEquals(5, $webhook->getRetryCount());
-        $this->assertTrue($webhook->hasExceededMaxRetries());
-    }
-
-    public function testRetryDelayCappedAt60Seconds()
+    public function testMaxRetryDurationHandling()
     {
         $this->webhookSender->method('send')->willReturn(false);
 
         $webhook = new Webhook("https://webhook-test.info1100.workers.dev/fail1", 2, "Kumaran Powell", "Serene Sands");
-        $this->mockSleep(); // Simulate the sleep behavior
+
+        $this->processor->expects($this->exactly(6))
+            ->method('sleep')
+            ->withConsecutive([1], [2], [4], [8], [16], [32]);
+
         $this->processor->process($webhook);
 
-        // Assertions for > 60s
+        $this->assertEquals(5, $webhook->getRetryCount());
     }
 
     public function testSkipWebhooksAfterMaxFailures()
@@ -92,24 +70,22 @@ class WebhookProcessorTest extends TestCase
         $webhooks = [
             new Webhook("https://webhook-test.info1100.workers.dev/fail1", 2, "Kumaran Powell", "Serene Sands"),
             new Webhook("https://webhook-test.info1100.workers.dev/fail1", 5, "Suada Katz", "Serene Sands"),
+            new Webhook("https://webhook-test.info1100.workers.dev/fail1", 6, "Another Person", "Serene Sands"),
+            new Webhook("https://webhook-test.info1100.workers.dev/fail1", 3, "Yet Another", "Serene Sands"),
+            new Webhook("https://webhook-test.info1100.workers.dev/fail1", 1, "Last Chance", "Serene Sands"),
         ];
+
+        $this->processor->expects($this->any())
+            ->method('sleep');
 
         foreach ($webhooks as $webhook) {
             $this->processor->process($webhook);
         }
 
         $this->assertEquals(5, $webhooks[0]->getRetryCount());
-    }
-
-    private function mockSleep()
-    {
-        $this->getMockBuilder(WebhookProcessor::class)
-            ->setMethods(['sleep'])
-            ->getMock()
-            ->method('sleep')
-            ->will($this->returnCallback(function($seconds) {
-                // Simulate the sleep time here
-                echo "Slept for $seconds seconds\n";
-            }));
+        $this->assertEquals(5, $webhooks[1]->getRetryCount());
+        $this->assertEquals(5, $webhooks[2]->getRetryCount());
+        $this->assertEquals(5, $webhooks[3]->getRetryCount());
+        $this->assertEquals(0, $webhooks[4]->getRetryCount());
     }
 }

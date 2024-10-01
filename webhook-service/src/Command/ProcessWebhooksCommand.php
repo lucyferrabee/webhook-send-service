@@ -10,7 +10,6 @@ use App\Domain\Webhook\Webhook;
 
 class ProcessWebhooksCommand extends Command
 {
-    protected static $defaultName = 'app:process-webhooks';
     private WebhookProcessor $processor;
 
     public function __construct(WebhookProcessor $processor)
@@ -36,15 +35,15 @@ class ProcessWebhooksCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function loadWebhooks(): array
+    protected function loadWebhooks(): array
     {
         $fileContent = file_get_contents('src/Repository/webhooks.txt');
         $webhooksData = explode(PHP_EOL, $fileContent);
 
         $webhooks = [];
         foreach ($webhooksData as $webhookData) {
-            [$url, $id, $payload] = explode(',', $webhookData);
-            $webhooks[] = new Webhook($id, $url, $payload);
+            [$url, $id, $name, $event] = explode(',', $webhookData);
+            $webhooks[] = new Webhook($id, $url, $name, $event);
         }
 
         return $webhooks;

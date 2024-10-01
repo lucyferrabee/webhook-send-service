@@ -6,20 +6,17 @@ class Webhook
 {
     private string $id;
     private string $url;
-    private string $payload;
+    private string $name;
+    private string $event;
     private int $retryCount = 0;
     private int $maxRetries = 5;
 
-    public function __construct(string $id, string $url, string $payload)
+    public function __construct(string $id, string $url, string $name, $event)
     {
         $this->id = $id;
         $this->url = $url;
-        $this->payload = $payload;
-    }
-
-    public function getRetryDelay(): int
-    {
-        return min(60, pow(2, $this->retryCount));
+        $this->name = $name;
+        $this->event = $event;
     }
 
     public function incrementRetryCount(): void
@@ -37,14 +34,28 @@ class Webhook
         return $this->url;
     }
 
-    public function getPayload(): string
+    public function getName(): string
     {
-        return $this->payload;
+        return $this->name;
     }
 
     public function getId(): string
     {
         return $this->id;
+    }
+
+    public function getEvent(): string
+    {
+        return $this->event;
+    }
+
+    public function getPayload(): array
+    {
+        return [
+            $this->name,
+            $this->event,
+            $this->id
+        ];
     }
 
     public function getRetryCount(): string
