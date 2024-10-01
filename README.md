@@ -2,7 +2,7 @@
 
 ## Overview
 The Webhook Processor is a PHP Symfony application designed to manage and send webhook notifications efficiently,
-utilizing an exponential backoff strategy for retries on failure. The application follows Domain-Driven Design (DDD)
+using an exponential backoff strategy for retries on failure. The application follows Domain-Driven Design (DDD)
 principles to structure the codebase for maintainability, scalability, and clarity.
 
 ## Installation and Commands
