@@ -10,7 +10,6 @@ use App\Application\Webhook\WebhookLoader;
 
 class WebhookProcessorTest extends TestCase
 {
-    // Set up reusable mocks and fixtures
     /**
      * @var mixed|\PHPUnit\Framework\MockObject\MockObject
      */
@@ -28,7 +27,6 @@ class WebhookProcessorTest extends TestCase
     {
         $this->webhookSender = $this->createMock(WebhookSender::class);
         $this->processor = new WebhookProcessor($this->webhookSender);
-        $this->loader = new WebhookLoader();
     }
 
     public function testLoadWebhooksFromFile()
@@ -43,7 +41,7 @@ class WebhookProcessorTest extends TestCase
 
     public function testSuccessfulWebhookSend()
     {
-        $this->webhookSender->method('send')->willReturn(true);  // Simulate success
+        $this->webhookSender->method('send')->willReturn(true);
 
         $webhook = new Webhook("https://webhook-test.info1100.workers.dev/success1", 1, "Olimpia Krasteva", "Spooky Summit");
         $this->processor->process($webhook);
@@ -59,7 +57,7 @@ class WebhookProcessorTest extends TestCase
 
         $webhook = new Webhook("https://webhook-test.info1100.workers.dev/retry1", 6, "Neha Lebeau", "Fall Foliage Farm");
 
-        $this->mockSleep(); // Mock the sleep function to avoid delays
+        $this->mockSleep();
         $this->processor->process($webhook);
 
         $this->assertEquals(3, $webhook->getRetryCount());
