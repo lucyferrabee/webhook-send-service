@@ -12,7 +12,7 @@ To set up the project, ensure you have PHP (version 7.4 or later) and Composer i
 1. **Clone the repository:**
    ```bash
    git clone git@github.com:lucyferrabee/webhook-send-service.git
-   cd webhook-send-service
+   cd webhook-send-service/webhook-service
    composer install
 2. **Run the process webhooks command**
    ```bash
