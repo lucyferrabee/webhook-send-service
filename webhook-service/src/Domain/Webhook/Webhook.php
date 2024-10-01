@@ -10,7 +10,7 @@ class Webhook
     private string $event;
     private int $retryCount = 0;
 
-    public function __construct(string $id, string $url, string $name, $event)
+    public function __construct(int $id, string $url, string $name, $event)
     {
         $this->id = $id;
         $this->url = $url;
@@ -28,7 +28,7 @@ class Webhook
         return $this->name;
     }
 
-    public function getId(): string
+    public function getId(): int
     {
         return $this->id;
     }
@@ -47,8 +47,13 @@ class Webhook
         ];
     }
 
-    public function getRetryCount(): string
+    public function getRetryCount(): int
     {
         return $this->retryCount;
+    }
+
+    public function increaseRetryCount(): int
+    {
+        return $this->retryCount++;
     }
 }

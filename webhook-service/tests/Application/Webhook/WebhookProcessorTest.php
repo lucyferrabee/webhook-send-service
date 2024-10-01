@@ -25,7 +25,7 @@ class WebhookProcessorTest extends TestCase
     {
         $this->webhookSender->method('send')->willReturn(true);
 
-        $webhook = new Webhook("https://webhook-test.info1100.workers.dev/success1", 1, "Olimpia Krasteva", "Spooky Summit");
+        $webhook = new Webhook(1, "https://webhook-test.info1100.workers.dev/success1", "Olimpia Krasteva", "Spooky Summit");
         $this->processor->process($webhook);
 
         $this->assertEquals(0, $webhook->getRetryCount());
@@ -37,7 +37,7 @@ class WebhookProcessorTest extends TestCase
             ->method('send')
             ->willReturnOnConsecutiveCalls(false, false, false, true);
 
-        $webhook = new Webhook("https://webhook-test.info1100.workers.dev/retry1", 6, "Neha Lebeau", "Fall Foliage Farm");
+        $webhook = new Webhook(6, "https://webhook-test.info1100.workers.dev/retry1", "Neha Lebeau", "Fall Foliage Farm");
 
         $this->processor->expects($this->exactly(3))
         ->method('sleep')
@@ -52,7 +52,7 @@ class WebhookProcessorTest extends TestCase
     {
         $this->webhookSender->method('send')->willReturn(false);
 
-        $webhook = new Webhook("https://webhook-test.info1100.workers.dev/fail1", 2, "Kumaran Powell", "Serene Sands");
+        $webhook = new Webhook(2, "https://webhook-test.info1100.workers.dev/fail1", "Kumaran Powell", "Serene Sands");
 
         $this->processor->expects($this->exactly(6))
             ->method('sleep')
@@ -60,7 +60,7 @@ class WebhookProcessorTest extends TestCase
 
         $this->processor->process($webhook);
 
-        $this->assertEquals(5, $webhook->getRetryCount());
+        $this->assertEquals(6, $webhook->getRetryCount());
     }
 
     public function testSkipWebhooksAfterMaxFailures()
@@ -68,11 +68,12 @@ class WebhookProcessorTest extends TestCase
         $this->webhookSender->method('send')->willReturn(false);
 
         $webhooks = [
-            new Webhook("https://webhook-test.info1100.workers.dev/fail1", 2, "Kumaran Powell", "Serene Sands"),
-            new Webhook("https://webhook-test.info1100.workers.dev/fail1", 5, "Suada Katz", "Serene Sands"),
-            new Webhook("https://webhook-test.info1100.workers.dev/fail1", 6, "Another Person", "Serene Sands"),
-            new Webhook("https://webhook-test.info1100.workers.dev/fail1", 3, "Yet Another", "Serene Sands"),
-            new Webhook("https://webhook-test.info1100.workers.dev/fail1", 1, "Last Chance", "Serene Sands"),
+            new Webhook(2, "https://webhook-test.info1100.workers.dev/fail1", "Kumaran Powell", "Serene Sands"),
+            new Webhook(5, "https://webhook-test.info1100.workers.dev/fail1", "Suada Katz", "Serene Sands"),
+            new Webhook(6, "https://webhook-test.info1100.workers.dev/fail1", "Another Person", "Serene Sands"),
+            new Webhook(3, "https://webhook-test.info1100.workers.dev/fail1", "Yet Another", "Serene Sands"),
+            new Webhook(1, "https://webhook-test.info1100.workers.dev/fail1", "Another Chance", "Serene Sands"),
+            new Webhook(4, "https://webhook-test.info1100.workers.dev/fail1", "Last Chance", "Serene Sands"),
         ];
 
         $this->processor->expects($this->any())
@@ -82,10 +83,11 @@ class WebhookProcessorTest extends TestCase
             $this->processor->process($webhook);
         }
 
-        $this->assertEquals(5, $webhooks[0]->getRetryCount());
-        $this->assertEquals(5, $webhooks[1]->getRetryCount());
-        $this->assertEquals(5, $webhooks[2]->getRetryCount());
-        $this->assertEquals(5, $webhooks[3]->getRetryCount());
-        $this->assertEquals(0, $webhooks[4]->getRetryCount());
+        $this->assertEquals(6, $webhooks[0]->getRetryCount());
+        $this->assertEquals(6, $webhooks[1]->getRetryCount());
+        $this->assertEquals(6, $webhooks[2]->getRetryCount());
+        $this->assertEquals(6, $webhooks[3]->getRetryCount());
+        $this->assertEquals(6, $webhooks[4]->getRetryCount());
+        $this->assertEquals(0, $webhooks[5]->getRetryCount());
     }
 }

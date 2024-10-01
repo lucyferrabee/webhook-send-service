@@ -43,6 +43,7 @@ class WebhookProcessor
                 }
 
                 echo "Retrying {$endpoint} in {$delay} seconds\n";
+                $webhook->increaseRetryCount();
                 $this->sleep($delay);
                 $delay = min($delay * 2, 60);
             }

@@ -18,7 +18,7 @@ class WebhookSender
     public function send(Webhook $webhook): bool
     {
         try {
-            $response = $this->httpClient->request('GET', $webhook->getUrl(), [
+            $response = $this->httpClient->request('POST', $webhook->getUrl(), [
                 'json' => $webhook->getPayload(),
             ]);
 
